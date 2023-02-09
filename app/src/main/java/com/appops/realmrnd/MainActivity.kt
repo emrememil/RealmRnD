@@ -1,7 +1,6 @@
 package com.appops.realmrnd
 
 import android.app.Dialog
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Window
@@ -9,13 +8,17 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.appops.realmrnd.model.Employee
 import com.appops.realmrnd.model.EmployeeModel
+import com.appops.realmrnd.secure.encryption.EncryptionProvider
+import com.appops.realmrnd.secure.key.RealmEncryptionKeyProvider
+import com.appops.realmrnd.secure.key.RealmEncryptionKeyProvider.Util
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.edit_employee_dialog.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,8 +38,16 @@ class MainActivity : AppCompatActivity() {
 
 
         Realm.init(this)
+
+        val realmEncryptionKeyProvider = RealmEncryptionKeyProvider(this)
+
+        val encryptionKey = realmEncryptionKeyProvider.secureRealmKey
+        val formattedKey = Util.getFormattedSecureKey(encryptionKey)
+        Log.e("SECURE KEY", formattedKey)
+
         val config = RealmConfiguration.Builder()
             .name("myrealm.realm")
+            .encryptionKey(encryptionKey)
             .build()
         realm = Realm.getInstance(config)
 
